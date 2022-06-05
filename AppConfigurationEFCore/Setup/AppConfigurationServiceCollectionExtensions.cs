@@ -87,13 +87,11 @@ namespace AppConfigurationEFCore.Setup
         /// </param>
         public static IServiceCollection AddAppConfiguration(this IServiceCollection services, Type dbContextType, Type configurationRecordsType, Action<CustomRecordTypeOptions>? customRecordTypesAction = null)
         {
-            Type factoryType = typeof(Factory<,>).MakeGenericType(dbContextType, configurationRecordsType);
-            services.TryAddSingleton(factoryType);
-
             var options = new CustomRecordTypeOptions();
             customRecordTypesAction?.Invoke(options);
 
-            RegisterTypeHandlersFactory(services, options);
+            Type factoryType = typeof(Factory<,>).MakeGenericType(dbContextType, configurationRecordsType);
+            RegisterFactoryInstances(services, options, factoryType);
 
             services.TryAddScoped(typeof(IAppConfiguration<>).MakeGenericType(configurationRecordsType), services =>
             {
@@ -111,9 +109,15 @@ namespace AppConfigurationEFCore.Setup
             return services;
         }
 
-        private static void RegisterTypeHandlersFactory(IServiceCollection services, CustomRecordTypeOptions options)
+        private static void RegisterFactoryInstances(IServiceCollection services, CustomRecordTypeOptions options, Type factoryType)
         {
-            services.TryAddSingleton<IRecordHandlerFactory>(new RecordHandlerFactory(options.ReferenceTypeHandlers, options.VTTypeHandlers));
+            //services.TryAddSingleton<IRecordHandlerFactory>();
+            var recordHandlerFactory = new RecordHandlerFactory(options.ReferenceTypeHandlers, options.VTTypeHandlers);
+
+            var factoryConstructor = factoryType.GetConstructor(new Type[] { typeof(IRecordHandlerFactory) });
+
+
+            services.AddSingleton(factoryType, factoryConstructor!.Invoke(new object[] { recordHandlerFactory }));
         }
     }
 
