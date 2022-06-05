@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace SchoolAssistans.Tests.DbEntities
+using DbContext = Tests.Help.Db.DbContext;
+
+namespace Tests
 {
     internal static class TestDatabase
     {
@@ -60,7 +62,6 @@ namespace SchoolAssistans.Tests.DbEntities
                 new DbContextOptionsBuilder<DbContext>()
                     .LogTo(message => Debug.WriteLine(message))
                     .UseSqlServer(ConnectionString)
-                    .UseLazyLoadingProxies()
                     .Options);
 
         public static async Task ClearDataAsync<TDbEntity>()

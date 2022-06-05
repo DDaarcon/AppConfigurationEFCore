@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace SchoolAssistans.Tests
+namespace Tests
 {
     internal static class TestServices
     {
