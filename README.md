@@ -1,7 +1,7 @@
 # AppConfigurationEFCore
 Configurable, type-aware service for storing application configuration in database table.
 
-If you would like to see commits from before the repository upload, go to SchoolAssistant repo, branch [AppConfigRepository_as_separate_project](https://github.com/DDaarcon/SchoolAssistant/tree/AppConfigRepository_as_separate_project).
+~~If you would like to see commits from before the repository upload, go to SchoolAssistant repo, branch [AppConfigRepository_as_separate_project](https://github.com/DDaarcon/SchoolAssistant/tree/AppConfigRepository_as_separate_project).~~ Currently private.
 
 ### Dependencies
 Entity Framework Core 6.0.4,
