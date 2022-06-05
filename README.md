@@ -67,3 +67,31 @@ public class AppConfigRecords
 
 ###### Record types
 By deafult **only `int`, `decimal` and `string` record handlers are available**. To add new use `customRecordTypesAction` parameter in `AddAppConfiguration`. You can add support for your own reference types (with `Add<T>(...)` method) or readonly structs (with `AddVT<T>(...)`). Those methods require conversion function from `string?` to `[yourType]?`, the other way is optional (`[...].ToString()` will be used by default).
+
+You can also pass, instead of function, object, which class implements interface `IRecordHandlerRule<T>` or `IVTRecordHandlerRule<T>`:
+```
+class CharHandler : IVTRecordHandlerRule<char>
+{
+    public string? FromType(char? en) => en is not null ? $"{en}" : null;
+
+    public char? ToType(string? db) => db?.FirstOrDefault();
+}
+
+...
+budilder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(options => {
+    options.AddVT(new CharHandler());
+});
+```
+or even built-in `JsonRecordHandlerRule<T>`:
+```
+private class SimpleClass
+{
+    public string Name { get; set; }
+    public int Number { get; set; }
+}
+
+...
+budilder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(options => {
+    options.Add(new JsonRecordHandlerRule<SimpleClass>());
+});
+```
