@@ -15,7 +15,7 @@ namespace Tests
         {
             TestDatabase.CreateContext(TestServices.Collection);
 
-            TestServices.Collection.AddAppConfiguration<DbContext, BasicAppConfigRecords>();
+            TestServices.Collection.AddAppConfiguration<MyDbContext, BasicAppConfigRecords>();
         }
 
         [SetUp]

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-using DbContext = Tests.Help.Db.DbContext;
+using MyDbContext = Tests.Help.Db.MyDbContext;
 
 namespace Tests
 {
@@ -14,11 +14,11 @@ namespace Tests
         private static readonly object _lock = new();
         private static bool _databaseInitialized;
 
-        private static DbContext? _context;
-        public static DbContext Context { get { return CreateContext(); } private set { _context = value; } }
+        private static MyDbContext? _context;
+        public static MyDbContext Context { get { return CreateContext(); } private set { _context = value; } }
 
 
-        public static DbContext CreateContext(IServiceCollection? services = null)
+        public static MyDbContext CreateContext(IServiceCollection? services = null)
         {
             InitializeContext(services);
 
@@ -57,9 +57,9 @@ namespace Tests
             _databaseInitialized = false;
         }
 
-        private static DbContext ConstructContext()
-            => new DbContext(
-                new DbContextOptionsBuilder<DbContext>()
+        private static MyDbContext ConstructContext()
+            => new MyDbContext(
+                new DbContextOptionsBuilder<MyDbContext>()
                     .LogTo(message => Debug.WriteLine(message))
                     .UseSqlServer(ConnectionString)
                     .Options);
@@ -81,12 +81,12 @@ namespace Tests
         public static void RequestContextFromServices(IServiceCollection services)
         {
             if (!_databaseInitialized) InitializeContext(services);
-            else _context = services.BuildServiceProvider().GetRequiredService<DbContext>();
+            else _context = services.BuildServiceProvider().GetRequiredService<MyDbContext>();
         }
 
         private static void AddContextToServices(IServiceCollection services)
         {
-            services.AddDbContext<DbContext>(options =>
+            services.AddDbContext<MyDbContext>(options =>
             {
                 options.UseSqlServer(ConnectionString);
             });

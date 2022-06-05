@@ -2,9 +2,9 @@
 
 namespace Tests.Help.Db
 {
-    internal class DbContext : Microsoft.EntityFrameworkCore.DbContext
+    internal class MyDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
-        public DbContext(DbContextOptions<DbContext> options)
+        public MyDbContext(DbContextOptions<MyDbContext> options)
             : base(options) { }
 
         protected DbSet<AppConfigurationEFCore.Entities.AppConfig> _Config { get; set; } = null!;

@@ -56,9 +56,9 @@ namespace AppConfigurationEFCore.Setup
 
         private bool AssignHandlerParamsAndValidateNulls(Type type, string key, Func<DbContext> getContext)
         {
-            _type = type; _key = key; _getContext = getContext;
+            _type = type; _key = key.Trim(); _getContext = getContext;
             if (_type is null) return false;
-            if (_key is null) return false;
+            if (String.IsNullOrEmpty(_key)) return false;
             if (_getContext is null) return false;
 
             if (_usedKeys.Contains(_key))
