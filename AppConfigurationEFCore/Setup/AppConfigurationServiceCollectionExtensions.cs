@@ -111,7 +111,6 @@ namespace AppConfigurationEFCore.Setup
 
         private static void RegisterFactoryInstances(IServiceCollection services, CustomRecordTypeOptions options, Type factoryType)
         {
-            //services.TryAddSingleton<IRecordHandlerFactory>();
             var recordHandlerFactory = new RecordHandlerFactory(options.ReferenceTypeHandlers, options.VTTypeHandlers);
 
             var factoryConstructor = factoryType.GetConstructor(new Type[] { typeof(IRecordHandlerFactory) });
