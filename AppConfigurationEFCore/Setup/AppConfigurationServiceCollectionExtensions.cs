@@ -133,6 +133,14 @@ namespace AppConfigurationEFCore.Setup
             var type = typeof(T);
             _info.Add(new HandlerInfo<T>(type, toTypeConverter, fromTypeConverter ?? (x => x?.ToString())));
         }
+
+        /// <summary>
+        /// Register reference type handler via object with converting methods.
+        /// </summary>
+        /// <typeparam name="T">Reference type</typeparam>
+        public void Add<T>(IRecordHandlerRule<T> rules) => Add(rules.ToType, rules.FromType);
+
+
         /// <summary>
         /// Register value type handler.
         /// </summary>
@@ -146,6 +154,13 @@ namespace AppConfigurationEFCore.Setup
             _vtInfo.Add(new VTHandlerInfo<T>(type, toTypeConverter, fromTypeConverter ?? (x => x?.ToString())));
         }
 
+        /// <summary>
+        /// Register value type handler via object with converting methods.
+        /// </summary>
+        /// <typeparam name="T">Value type</typeparam>
+        public void AddVT<T>(IVTRecordHandlerRule<T> rules)
+            where T : struct
+            => AddVT(rules.ToType, rules.FromType);
 
 
         public object[] ReferenceTypeHandlers => _info.ToArray()!;
