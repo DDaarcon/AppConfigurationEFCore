@@ -44,10 +44,11 @@ builder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(op
 
 ###### Records configuration
 Type `YourRecordsConfiguration` is where you define records used in your application. There are rules, how this class should be structured (it is also explained in summary of `AddAppConfiguration` method):
-`TRecords` type must have properties of type `RecordHandler<T>` (for records that represent reference types)
-or `VTRecordHandler<T>` (for records that represent value types, like `int`, `decimal`).
 
-Each property must have attribute `RecordKeyAttribute` with the key of that record.
+**`TRecords` type _must_ have properties of type `RecordHandler<T>` (for records that represent reference types)
+or `VTRecordHandler<T>` (for records that represent value types, like `int`, `decimal`).**
+
+**Each property _must_ have attribute `RecordKeyAttribute` with the key of that record.**
 
 Example:
 ```
@@ -55,10 +56,13 @@ public class AppConfigRecords
 {
     [RecordKey("name")]
     public RecordHandler<string> ApplicationName { get; private set; } = null!;
+    
     [RecordKey("maxItemsPerPage")]
     public VTRecordHandler<int> MaxItemsPerPage { get; private set; } = null!;
+    
     [RecordKey("defaultValueOfSth")]
     public VTRecordHandler<int> SomeDefaultValue { get; private set; } = null!;
+    
     [RecordKey("initialDate")]
     public VTRecordHandler<DateTime> InitialDate { get; private set; } = null!;
     ...
@@ -66,9 +70,9 @@ public class AppConfigRecords
 ```
 
 ###### Record types
-By deafult **only `int`, `decimal` and `string` record handlers are available**. To add new use `customRecordTypesAction` parameter in `AddAppConfiguration`. You can add support for your own reference types (with `Add<T>(...)` method) or readonly structs (with `AddVT<T>(...)`). Those methods require conversion function from `string?` to `[yourType]?`, the other way is optional (`[...].ToString()` will be used by default).
+By deafult **only `int`, `decimal` and `string` record handlers are available**. To add any desired type, use `customRecordTypesAction` parameter in `AddAppConfiguration`. You can add support for your own reference types (with `Add<T>(...)` method) or readonly structs (with `AddVT<T>(...)`). Those methods require conversion function from `string?` to `[yourType]?`, the opposite direction is optional (`[...].ToString()` will be used by default).
 
-You can also pass, instead of function, object, which class implements interface `IRecordHandlerRule<T>` or `IVTRecordHandlerRule<T>`:
+Instead of functions, you can also pass an object whose class implements interface `IRecordHandlerRule<T>` or `IVTRecordHandlerRule<T>`:
 ```
 class CharHandler : IVTRecordHandlerRule<char>
 {
