@@ -1,8 +1,6 @@
-﻿using AppConfigurationEFCore.Configuration;
-using AppConfigurationEFCore.Help;
+﻿using AppConfigurationEFCore.Help;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace AppConfigurationEFCore.Setup
 {
@@ -39,35 +37,10 @@ namespace AppConfigurationEFCore.Setup
         private void SetUpRecords()
         {
             _records = new TRecords();
-            var properties = _records.GetType().GetProperties()!;
 
-            foreach (var property in properties)
-            {
-                if (_configurationValidator.IsPropertyValid(property))
-                    property.SetValue(_records, CreateRecordOperations(property));
+            var setter = new RecordsPropertiesSetter<TDbContext>(_configurationValidator, _handlerFactory, _getContext);
 
-                else if (_configurationValidator.IsPropertyValidGroup(property))
-                    throw new NotImplementedException();
-
-                else
-                    throw new FormatException($"Incorrectly formed TRecords class. Property {property.Name} is either of invalid type (valid are RecordHandler<> and VTRecordHandler<>) or missing RecordKeyAttribute");
-            }
-        }
-
-        private object CreateRecordOperations(PropertyInfo property)
-        {
-            var attr = property.GetCustomAttribute<RecordKeyAttribute>()!;
-            var genericType = property.PropertyType.GenericTypeArguments[0];
-
-            object? handler = null;
-            if (genericType.IsValueType)
-                handler = _handlerFactory.GetVT(genericType, attr.Key, _getContext);
-            else
-                handler = _handlerFactory.Get(genericType, attr.Key, _getContext);
-
-            if (handler is null)
-                throw new ArgumentException($"Missing type handler. Storing/fetching rules for type {genericType.Name} has not been specified. To specify it use `customRecordTypesAction` parameter in AddAppConfiguration");
-            return handler;
+            setter.SetUp(_records);
         }
     }
 }
