@@ -1,7 +1,7 @@
 # AppConfigurationEFCore
 Configurable, type-aware service for storing application configuration in database table.
 
-If you would like to see commits before repository upload, go to SchoolAssistant repo, branch 'AppConfigRepository_as_separate_project'
+~~If you would like to see commits from before the repository upload, go to SchoolAssistant repo, branch [AppConfigRepository_as_separate_project](https://github.com/DDaarcon/SchoolAssistant/tree/AppConfigRepository_as_separate_project).~~ Currently private.
 
 ### Dependencies
 Entity Framework Core 6.0.4,
@@ -11,7 +11,7 @@ Microsoft.Extensions.DependencyInjection.Abstractions
 
 ## Usage
 ###### Table in database and DbSet<>
-It is important to add `DbSet<AppConfig>` to used `DbContext` (and create database table with migration, `Add-Migration AppConfiguration` in console):
+It is important to add `DbSet<AppConfig>` to `DbContext` used in your application (and create database table with migration, `Add-Migration AppConfiguration` in console):
 ```
 public class YourDbContext : DbContext {
   public SADbContext(DbContextOptions<SADbContext> options) : base(options) { }
@@ -44,10 +44,11 @@ builder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(op
 
 ###### Records configuration
 Type `YourRecordsConfiguration` is where you define records used in your application. There are rules, how this class should be structured (it is also explained in summary of `AddAppConfiguration` method):
-`TRecords` type must have properties of type `RecordHandler<T>` (for records that represent reference types)
-or `VTRecordHandler<T>` (for records that represent value types, like `int`, `decimal`).
 
-Each property must have attribute `RecordKeyAttribute` with the key of that record.
+**`TRecords` type _must_ have properties of type `RecordHandler<T>` (for records that represent reference types)
+or `VTRecordHandler<T>` (for records that represent value types, like `int`, `decimal`).**
+
+**Each property _must_ have attribute `RecordKeyAttribute` with the key of that record.**
 
 Example:
 ```
@@ -55,10 +56,13 @@ public class AppConfigRecords
 {
     [RecordKey("name")]
     public RecordHandler<string> ApplicationName { get; private set; } = null!;
+    
     [RecordKey("maxItemsPerPage")]
     public VTRecordHandler<int> MaxItemsPerPage { get; private set; } = null!;
+    
     [RecordKey("defaultValueOfSth")]
     public VTRecordHandler<int> SomeDefaultValue { get; private set; } = null!;
+    
     [RecordKey("initialDate")]
     public VTRecordHandler<DateTime> InitialDate { get; private set; } = null!;
     ...
@@ -66,4 +70,32 @@ public class AppConfigRecords
 ```
 
 ###### Record types
-By deafult **only `int`, `decimal` and `string` record handlers are available**. To add new use `customRecordTypesAction` parameter in `AddAppConfiguration`. You can add support for your own reference types (with `Add<T>(...)` method) or readonly structs (with `AddVT<T>(...)`). Those methods require conversion function from `string?` to `[yourType]?`, the other way is optional (`[...].ToString()` will be used by default).
+By deafult **only `int`, `decimal` and `string` record handlers are available**. To add any desired type, use `customRecordTypesAction` parameter in `AddAppConfiguration`. You can add support for your own reference types (with `Add<T>(...)` method) or readonly structs (with `AddVT<T>(...)`). Those methods require conversion function from `string?` to `[yourType]?`, the opposite direction is optional (`[...].ToString()` will be used by default).
+
+Instead of functions, you can also pass an object whose class implements interface `IRecordHandlerRule<T>` or `IVTRecordHandlerRule<T>`:
+```
+class CharHandler : IVTRecordHandlerRule<char>
+{
+    public string? FromType(char? en) => en is not null ? $"{en}" : null;
+
+    public char? ToType(string? db) => db?.FirstOrDefault();
+}
+
+...
+budilder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(options => {
+    options.AddVT(new CharHandler());
+});
+```
+or even built-in `JsonRecordHandlerRule<T>`:
+```
+private class SimpleClass
+{
+    public string Name { get; set; }
+    public int Number { get; set; }
+}
+
+...
+budilder.Services.AddAppConfiguration<YourDbContext, YourRecordsConfiguration>(options => {
+    options.Add(new JsonRecordHandlerRule<SimpleClass>());
+});
+```
