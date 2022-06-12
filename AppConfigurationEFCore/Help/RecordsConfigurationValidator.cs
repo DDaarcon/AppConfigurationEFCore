@@ -1,31 +1,23 @@
 ﻿using AppConfigurationEFCore.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AppConfigurationEFCore.Help
 {
     internal interface IRecordsConfigurationValidator
     {
         bool IsPropertyValid(PropertyInfo property);
-        bool IsPropertyValidGroup(PropertyInfo property);
+        bool IsPropertyValidGroup(PropertyInfo property, IEnumerable<Type> forbiddenTypes);
     }
 
     internal class RecordsConfigurationValidator : IRecordsConfigurationValidator
     {
-        public bool IsPropertyValid(PropertyInfo property) => 
+        public bool IsPropertyValid(PropertyInfo property) =>
             IsAssignableTo(property.PropertyType, typeof(RecordHandler<>))
             && property.GetCustomAttribute<RecordKeyAttribute>() is not null;
 
-        public bool IsPropertyValidGroup(PropertyInfo property)
+        public bool IsPropertyValidGroup(PropertyInfo property, IEnumerable<Type> forbiddenTypes)
         {
-            var properties = property.PropertyType.GetProperties()!;
-
-            bool propertiesValid = properties.All(x => IsPropertyValid(x) || IsPropertyValidGroup(x));
-            if (!propertiesValid)
+            if (forbiddenTypes.Contains(property.PropertyType))
                 return false;
 
             bool hasAttribute = property.GetCustomAttribute<RecordGroupAttribute>() is not null

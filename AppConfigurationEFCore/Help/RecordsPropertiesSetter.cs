@@ -11,6 +11,7 @@ namespace AppConfigurationEFCore.Help
         private readonly IRecordsConfigurationValidator _configurationValidator;
         private readonly IRecordHandlerFactory _handlerFactory;
         private readonly Func<TDbContext> _getContext;
+        private IEnumerable<Type> _forbiddenGroupTypes;
 
         private object _records = null!;
         private string? _keyPrefix;
@@ -18,17 +19,21 @@ namespace AppConfigurationEFCore.Help
         public RecordsPropertiesSetter(
             IRecordsConfigurationValidator configurationValidator,
             IRecordHandlerFactory handlerFactory,
-            Func<TDbContext> getContext)
+            Func<TDbContext> getContext,
+            IEnumerable<Type>? forbiddenGroupTypes = null)
         {
             _configurationValidator = configurationValidator;
             _handlerFactory = handlerFactory;
             _getContext = getContext;
+            _forbiddenGroupTypes = forbiddenGroupTypes ?? new Type[0];
         }
 
         public void SetUp(object records, string? keyPrefix = null)
         {
             _records = records;
             _keyPrefix = keyPrefix;
+
+            _forbiddenGroupTypes = _forbiddenGroupTypes.Append(_records.GetType());
 
             var properties = _records.GetType().GetProperties()!;
 
@@ -37,11 +42,13 @@ namespace AppConfigurationEFCore.Help
                 if (_configurationValidator.IsPropertyValid(property))
                     property.SetValue(_records, CreateRecordOperations(property));
 
-                else if (_configurationValidator.IsPropertyValidGroup(property))
+                else if (_configurationValidator.IsPropertyValidGroup(property, _forbiddenGroupTypes))
                     property.SetValue(_records, CreateRecordsGroup(property));
 
                 else
-                    throw new FormatException($"Incorrectly formed TRecords class. Property {property.Name} is either of invalid type (valid are RecordHandler<> and VTRecordHandler<>) or missing RecordKeyAttribute");
+                    throw new FormatException(
+                        $"Incorrectly formed TRecords class. Property {property.Name} is either of invalid type (valid are RecordHandler<> and VTRecordHandler<>) or missing RecordKeyAttribute. " +
+                        $"It may also be incorrect or looping Group Record.");
             }
         }
 
@@ -74,7 +81,7 @@ namespace AppConfigurationEFCore.Help
                 throw new Exception("Invalid constructor");
 
             // TODO: Should not be created every time
-            var setter = new RecordsPropertiesSetter<TDbContext>(_configurationValidator, _handlerFactory, _getContext);
+            var setter = new RecordsPropertiesSetter<TDbContext>(_configurationValidator, _handlerFactory, _getContext, _forbiddenGroupTypes);
 
             setter.SetUp(recordsGroup, GetGroupKeyPrefix(property));
 
