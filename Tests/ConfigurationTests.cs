@@ -1,5 +1,6 @@
 ﻿using AppConfigurationEFCore;
 using AppConfigurationEFCore.Configuration;
+using AppConfigurationEFCore.Entities;
 using AppConfigurationEFCore.Setup;
 using NUnit.Framework;
 using System;
@@ -11,17 +12,6 @@ namespace Tests
 {
     internal class ConfigurationTests
     {
-        [OneTimeSetUp]
-        public void OneTimeSetup()
-        {
-        }
-        [SetUp]
-        public void SetupOnce()
-        {
-            TestServices.Clear();
-            TestDatabase.DisposeContext();
-            TestDatabase.CreateContext(TestServices.Collection);
-        }
 
         [Test]
         public void Should_throw_error_invalid_records_type_invalid_property_type()
@@ -318,5 +308,6 @@ namespace Tests
             public string Name { get; set; }
             public int Number { get; set; }
         }
+
     }
 }

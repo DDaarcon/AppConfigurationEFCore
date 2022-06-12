@@ -1,8 +1,10 @@
 ﻿namespace AppConfigurationEFCore.Configuration
 {
-    /// <summary>
-    /// Attribute, that has to be present at each property of <c>TRecords</c> of <see cref="IAppConfiguration{TRecords}"/>.
-    /// </summary>
+    /// <summary> Attribute indicating record. </summary>
+    /// <remarks>
+    /// Attribute has to be present on properties of <c>TRecords</c> of <see cref="IAppConfiguration{TRecords}"/>,
+    /// that are of type <see cref="RecordHandler{T}"/> or <see cref="VTRecordHandler{T}"/>.
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class RecordKeyAttribute : Attribute
     {

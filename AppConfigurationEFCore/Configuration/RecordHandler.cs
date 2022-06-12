@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppConfigurationEFCore.Configuration
 {
-    public class VTRecordHandler<T> : RecordHandler<T?>
+    public sealed class VTRecordHandler<T> : RecordHandler<Nullable<T>>
         where T : struct
     {
         public VTRecordHandler(string key, Func<DbContext> getContext, Func<string?, T?> toType, Func<T?, string?> fromType) : base(key, getContext, toType, fromType)
