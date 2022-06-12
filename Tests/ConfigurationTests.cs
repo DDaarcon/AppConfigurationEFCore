@@ -12,6 +12,13 @@ namespace Tests
 {
     internal class ConfigurationTests
     {
+        [SetUp]
+        public void SetupOnce()
+        {
+            TestServices.Clear();
+            TestDatabase.DisposeContext();
+            TestDatabase.CreateContext(TestServices.Collection);
+        }
 
         [Test]
         public void Should_throw_error_invalid_records_type_invalid_property_type()
