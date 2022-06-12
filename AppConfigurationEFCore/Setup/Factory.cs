@@ -1,4 +1,5 @@
 ﻿using AppConfigurationEFCore.Configuration;
+using AppConfigurationEFCore.Help;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -10,15 +11,18 @@ namespace AppConfigurationEFCore.Setup
         where TRecords : class, new()
     {
         private readonly IRecordHandlerFactory _handlerFactory;
+        private readonly IRecordsConfigurationValidator _configurationValidator;
         private static TDbContext? _context;
 
         private TRecords? _records;
 
 
         public Factory(
-            IRecordHandlerFactory handlerFactory)
+            IRecordHandlerFactory handlerFactory,
+            IRecordsConfigurationValidator configurationValidator)
         {
             _handlerFactory = handlerFactory;
+            _configurationValidator = configurationValidator;
         }
 
         private readonly Func<TDbContext> _getContext = () => _context ?? throw new ArgumentNullException("DbContext has not been provided");
@@ -39,8 +43,12 @@ namespace AppConfigurationEFCore.Setup
 
             foreach (var property in properties)
             {
-                if (IsPropertyValid(property))
+                if (_configurationValidator.IsPropertyValid(property))
                     property.SetValue(_records, CreateRecordOperations(property));
+
+                else if (_configurationValidator.IsPropertyValidGroup(property))
+                    throw new NotImplementedException();
+
                 else
                     throw new FormatException($"Incorrectly formed TRecords class. Property {property.Name} is either of invalid type (valid are RecordHandler<> and VTRecordHandler<>) or missing RecordKeyAttribute");
             }
@@ -60,23 +68,6 @@ namespace AppConfigurationEFCore.Setup
             if (handler is null)
                 throw new ArgumentException($"Missing type handler. Storing/fetching rules for type {genericType.Name} has not been specified. To specify it use `customRecordTypesAction` parameter in AddAppConfiguration");
             return handler;
-        }
-
-        private bool IsPropertyValid(PropertyInfo property)
-        {
-            return IsAssignableTo(property.PropertyType, typeof(RecordHandler<>))
-                && property.GetCustomAttribute<RecordKeyAttribute>() is not null;
-        }
-
-        private bool IsAssignableTo(Type givenType, Type genericType)
-        {
-            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
-                return true;
-
-            Type? baseType = givenType.BaseType;
-            if (baseType == null) return false;
-
-            return IsAssignableTo(baseType, genericType);
         }
     }
 }

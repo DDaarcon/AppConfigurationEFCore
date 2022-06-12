@@ -1,4 +1,5 @@
 ﻿using AppConfigurationEFCore.Configuration;
+using AppConfigurationEFCore.Help;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -112,11 +113,12 @@ namespace AppConfigurationEFCore.Setup
         private static void RegisterFactoryInstances(IServiceCollection services, CustomRecordTypeOptions options, Type factoryType)
         {
             var recordHandlerFactory = new RecordHandlerFactory(options.ReferenceTypeHandlers, options.VTTypeHandlers);
+            var configurationValidator = new RecordsConfigurationValidator();
 
-            var factoryConstructor = factoryType.GetConstructor(new Type[] { typeof(IRecordHandlerFactory) });
+            var factoryConstructor = factoryType.GetConstructor(new Type[] { typeof(IRecordHandlerFactory), typeof(IRecordsConfigurationValidator) });
 
 
-            services.AddSingleton(factoryType, factoryConstructor!.Invoke(new object[] { recordHandlerFactory }));
+            services.AddSingleton(factoryType, factoryConstructor!.Invoke(new object[] { recordHandlerFactory, configurationValidator }));
         }
     }
 
