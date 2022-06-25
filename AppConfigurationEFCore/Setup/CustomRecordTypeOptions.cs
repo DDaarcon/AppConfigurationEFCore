@@ -6,6 +6,19 @@ namespace AppConfigurationEFCore.Setup
     public sealed class CustomRecordTypeOptions
     {
 
+        #region Default interface
+
+        public void RegisterDefaultInterface<TDefaultInterface, TDefaultRecordsConfig>()
+            where TDefaultInterface : IAppConfiguration<TDefaultRecordsConfig>
+            where TDefaultRecordsConfig : class, new()
+        {
+            _defaultInterface = new DefaultInterfaceInfo(typeof(TDefaultInterface), typeof(TDefaultRecordsConfig));
+        }
+
+        public bool RegisterOnlyUserDefaultInterface { get; set; }
+
+        #endregion
+
         #region Adding custom record handlers
 
         /// <summary>
@@ -48,6 +61,13 @@ namespace AppConfigurationEFCore.Setup
             where T : struct
             => AddVT(rules.ToType, rules.FromType);
 
+        #endregion
+
+        private DefaultInterfaceInfo? _defaultInterface;
+        public bool HasDefaultInterface => _defaultInterface?.defaultInterface is not null;
+        public Type? DefaultInterface => _defaultInterface?.defaultInterface;
+        public Type? DefaultRecordsConfig => _defaultInterface?.defaultRecordsConfig;
+
 
         public object[] ReferenceTypeHandlers => _info.ToArray()!;
         public object[] VTTypeHandlers => _vtInfo.ToArray()!;
@@ -57,7 +77,9 @@ namespace AppConfigurationEFCore.Setup
         private readonly ArrayList _vtInfo = new();
     }
 
-
+    internal record DefaultInterfaceInfo(
+        Type defaultInterface,
+        Type defaultRecordsConfig);
 
     internal record HandlerInfo<T>(
         Type ForType,
