@@ -1,4 +1,5 @@
 ﻿using AppConfigurationEFCore.Configuration;
+using AppConfigurationEFCore.Exceptions;
 using AppConfigurationEFCore.Setup;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
@@ -25,7 +26,7 @@ namespace AppConfigurationEFCore.Help
             _configurationValidator = configurationValidator;
             _handlerFactory = handlerFactory;
             _getContext = getContext;
-            _forbiddenGroupTypes = forbiddenGroupTypes ?? new Type[0];
+            _forbiddenGroupTypes = forbiddenGroupTypes ?? Array.Empty<Type>();
         }
 
         public void SetUp(object records, string? keyPrefix = null)
@@ -72,13 +73,13 @@ namespace AppConfigurationEFCore.Help
 
         private object CreateRecordsGroup(PropertyInfo property)
         {
-            var constructor = property.PropertyType.GetConstructor(new Type[0]);
+            var constructor = property.PropertyType.GetConstructor(Array.Empty<Type>());
             if (constructor is null)
-                throw new Exception($"Type {property.PropertyType.Name} must have parameterless constructor");
+                throw new MissingParameterlessConstructorOnRecordHandlerException($"Type {property.PropertyType.Name} must have parameterless constructor");
 
             var recordsGroup = constructor.Invoke(null);
             if (recordsGroup is null)
-                throw new Exception("Invalid constructor");
+                throw new InvalidRecordHandlerConstructorException("Invalid constructor");
 
             // TODO: Should not be created every time
             var setter = new RecordsPropertiesSetter<TDbContext>(_configurationValidator, _handlerFactory, _getContext, _forbiddenGroupTypes);
@@ -88,7 +89,7 @@ namespace AppConfigurationEFCore.Help
             return recordsGroup;
         }
 
-        private string? GetGroupKeyPrefix(PropertyInfo property)
+        private static string? GetGroupKeyPrefix(PropertyInfo property)
         {
             var attr = property.GetCustomAttribute<RecordGroupAttribute>()
                 ?? property.PropertyType.GetCustomAttribute<RecordGroupAttribute>();

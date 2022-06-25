@@ -38,7 +38,6 @@ namespace AppConfigurationEFCore
         private TDbContext _context;
         private readonly IServiceScopeFactory? _scopeFactory;
 
-
         public AppConfiguration(
             TDbContext context,
             IServiceScopeFactory? scopeFactory,
@@ -62,7 +61,7 @@ namespace AppConfigurationEFCore
 
         public async Task SaveAsync(CancellationToken cancellationToken = default)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void UseIndependentDbContext()

@@ -6,7 +6,7 @@
     /// that are of type <see cref="RecordHandler{T}"/> or <see cref="VTRecordHandler{T}"/>.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class RecordKeyAttribute : Attribute
+    public sealed class RecordKeyAttribute : Attribute
     {
         public string Key { get; }
         public RecordKeyAttribute(string key)

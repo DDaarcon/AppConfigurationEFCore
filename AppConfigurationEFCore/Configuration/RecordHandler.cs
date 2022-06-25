@@ -43,7 +43,7 @@ namespace AppConfigurationEFCore.Configuration
         /// Get value from database.
         /// </summary>
         public async Task<T?> GetAsync(CancellationToken cancellationToken = default) =>
-            _toType((await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken))?.Value);
+            _toType((await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken).ConfigureAwait(false))?.Value);
 
         /// <summary>
         /// Set database's entry to <paramref name="value"/>.
@@ -61,7 +61,7 @@ namespace AppConfigurationEFCore.Configuration
         /// </summary>
         public async Task SetAsync(T? value, CancellationToken cancellationToken = default)
         {
-            var entry = await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken);
+            var entry = await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken).ConfigureAwait(false);
             entry ??= Add();
 
             entry.Value = _fromType(value);
@@ -81,8 +81,8 @@ namespace AppConfigurationEFCore.Configuration
         /// </summary>
         public async Task SetAndSaveAsync(T? value, CancellationToken cancellationToken = default)
         {
-            await SetAsync(value, cancellationToken);
-            await _Context.SaveChangesAsync(cancellationToken);
+            await SetAsync(value, cancellationToken).ConfigureAwait(false);
+            await _Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -103,11 +103,11 @@ namespace AppConfigurationEFCore.Configuration
         /// </summary>
         public async Task<bool> SetIfEmptyAsync(T? value, CancellationToken cancellationToken = default)
         {
-            var entry = await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken);
+            var entry = await _Repo.FirstOrDefaultAsync(x => x.Key == _key, cancellationToken).ConfigureAwait(false);
             if (!String.IsNullOrEmpty(entry?.Value))
                 return false;
 
-            await SetAsync(value, cancellationToken);
+            await SetAsync(value, cancellationToken).ConfigureAwait(false);
             return true;
         }
 

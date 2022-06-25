@@ -13,7 +13,7 @@ namespace AppConfigurationEFCore.Configuration
     /// Attribute has to be present on class representing group of records, or on property of Records Configuration class
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false)]
-    public class RecordGroupAttribute : Attribute
+    public sealed class RecordGroupAttribute : Attribute
     {
         /// <summary> Prefix for each record in group </summary>
         public string? GroupKey { get; set; }

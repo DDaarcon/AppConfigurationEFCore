@@ -9,10 +9,12 @@
 	<Version>1.0.1</Version>
 	<Authors>Dariusz Wiktorowski</Authors>
 	<Company>Dariusz Wiktorowski</Company>
-	  
+
+	<AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Lindhart.Analyser.MissingAwaitWarning" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
   </ItemGroup>
